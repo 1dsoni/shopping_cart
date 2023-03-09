@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied
 
+from user.choices import UserStatusChoice
 from user.models import User
 from web_auth.models import RefreshToken
 
@@ -35,7 +36,7 @@ def verify_refresh_token(jwt_token) -> RefreshToken:
     token = decoded["token"]
     token_obj = RefreshToken.objects.get(token=token)
 
-    if token_obj.is_expired or token_obj.exp < timezone.now():
+    if token_obj.is_expired or token_obj.exp < timezone.now() or token_obj.user.status != UserStatusChoice.active:
         raise PermissionDenied
 
     return token_obj
